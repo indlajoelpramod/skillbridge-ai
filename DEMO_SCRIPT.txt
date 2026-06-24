@@ -1,70 +1,39 @@
-=============================================================================
-SkillBridge AI — Career & Study Mentor Agent Demo Script
-=============================================================================
+[0:00 — HOOK]
+Hello everyone. Transitioning from academic study to a tech career can feel like staring at a massive, confusing wall of information. That's why I created SkillBridge AI — a personalized career and learning mentor agent that identifies your skill gaps and designs custom, realistic weekly roadmaps to help you achieve your dream role.
 
-This script guides you through demonstrating the core features and flows of SkillBridge AI.
+[0:20 — WHAT IT IS]
+SkillBridge AI is a state-aware multi-agent mentor built on the Google ADK framework. It is submitted under Track 1: Agents for Good, as it aims to democratize high-quality, personalized career mentorship and technical education for self-learners globally.
 
------------------------------------------------------------------------------
-Prerequisites
------------------------------------------------------------------------------
-Ensure your .env file is configured in the skillbridge-ai root directory:
-GOOGLE_API_KEY=AIzaSy...
+[0:40 — SHOW THE BANNER]
+(show assets/cover_page_banner.png)
+As you can see from our cover banner, SkillBridge AI acts as a secure, intelligent, and automated bridge connecting your current skills and certifications directly to real-world job market requirements.
 
------------------------------------------------------------------------------
-Step 1: Start the Playground Server
------------------------------------------------------------------------------
-1. Run the local dev server:
-   make playground
-   (This runs: uv run adk web app --host 127.0.0.1 --port 18081 --reload_agents)
+[1:00 — ARCHITECTURE]
+(show assets/architecture_diagram.png)
+Let's look at how the architecture works under the hood. 
+First, when a user enters a query, it passes through the security_checkpoint node, which scrubs any PII like emails or phone numbers, blocks prompt injections, and logs details to a structured JSON audit log. 
+If clean, the request routes to our main orchestrator_node, which executes the orchestrator agent. 
+The orchestrator agent coordinates delegation using AgentTools to run our specialized sub-agents: the career_advisor, which analyzes skill sets and certificates, and the study_planner, which outlines study milestones. 
+Both agents are connected via stdio transport to our local FastMCP server, which supplies database-backed skills, job demand rates, and custom coding exercises. 
+Finally, if a roadmap is requested, the workflow routes to our hitl_node, pausing with a RequestInput prompt to ask the user for their weekly hour commitment.
 
-2. Open your browser and navigate to:
-   http://localhost:18081
+[2:00 — LIVE DEMO]
+(switch to playground at localhost:18081)
+Let's see this in action. I'll ask: "I'm looking to become an AI Engineer. Can I get a personalized learning roadmap?"
+(pause)
+Observe that the security checkpoint validates the request immediately. The orchestrator processes the input, identifies that a roadmap has been requested, and routing logic passes it to the HITL node.
+Now, the playground UI pauses and prompts me: "To create a personalized learning roadmap, how many hours per week can you dedicate to study? (e.g. 10)".
+I will enter "15" and hit Resume.
+(pause)
+Upon resumption, the study_planner agent starts up, queries the FastMCP server for course databases and skill standards, and generates a personalized week-by-week curriculum tailored exactly to my 15-hour availability.
+Next, let's test our career advisor. I will ask: "What certifications and skills do I need for a Software Developer role?"
+(pause)
+The orchestrator delegates to the career_advisor agent, which calls the MCP tools get_skill_requirements and get_job_market_insights. Within seconds, it returns a precise list of recommended certs and global market demand metrics.
 
------------------------------------------------------------------------------
-Step 2: Security & Scrubbing Verification (PII & Off-topic)
------------------------------------------------------------------------------
-SkillBridge AI has a built-in security node filtering off-topic topics or malicious inputs.
+[3:00 — SECURITY & MCP]
+(show terminal window for audit logs)
+Our security checkpoint ensures safe interactions by checking for injections and stripping PII like phone numbers. You can see the structured JSON audit logs in the console. 
+Additionally, our stdio FastMCP server exposes robust, local tools that allow our sub-agents to access live catalogs, salaries, and practice exercises, bridging the gap between LLM reasoning and real-world database lookups.
 
-1. Send an off-topic/politics message:
-   "Who is the current President of the United States?"
-   -> Expectation: The agent blocks this query, outputting:
-      "Security Check Failed: Prompt injection attempt detected. The incident has been logged."
-      (Look at console logs for audit logs containing: "type": "domain_policy_off_topic")
-
-2. Send a query containing PII (Phone/Email):
-   "Hi, my email is student@example.com and phone is +1-555-0199. I want to become an AI Engineer."
-   -> Expectation: The agent processes the query normally but automatically scrubs the email and phone.
-      (Look at console logs to see the sanitized query: "[EMAIL_REDACTED]" and "[PHONE_REDACTED]")
-
------------------------------------------------------------------------------
-Step 3: Orchestrator Delegation & Human-In-The-Loop (HITL) Interruption
------------------------------------------------------------------------------
-1. Send the primary roadmap query:
-   "I'm looking to become an AI Engineer. Can I get a personalized learning roadmap?"
-
-2. Expectation: The orchestrator processes the request and automatically routes it to the HITL node.
-   You will see an interactive prompt appear in the playground UI:
-   "To create a personalized learning roadmap, how many hours per week can you dedicate to study? (e.g. 10)"
-
------------------------------------------------------------------------------
-Step 4: Resuming with HITL Input & Roadmap Generation
------------------------------------------------------------------------------
-1. In the input box provided by the UI, enter:
-   "15"
-   (or "about 15 hours per week" — our robust regex handles natural language!)
-
-2. Expectation:
-   - The workflow resumes and executes the Study Planner agent.
-   - The Study Planner connects to the MCP toolset (mcp_server.py) and executes local tools to fetch study materials and generate the custom day-by-day roadmap.
-   - You will receive a beautifully formatted weekly learning roadmap tailored to a 15-hour study commitment.
-
------------------------------------------------------------------------------
-Step 5: Direct Career Advisor MCP Query
------------------------------------------------------------------------------
-1. Ask the agent:
-   "What certifications and skills do I need for a Software Developer role?"
-
-2. Expectation:
-   - The Orchestrator routes the request to the Career Advisor agent.
-   - The Career Advisor calls the MCP tools (`get_job_market_trends` and `identify_skill_gaps`) to inspect actual required certifications and skills.
-   - You will receive a personalized list of target certifications and optimizations for your professional profile.
+[3:30 — IMPACT / CLOSE]
+In summary, SkillBridge AI makes high-quality, structured career mentoring and technical guidance accessible and secure for anyone, anywhere. Thank you.
